@@ -58,13 +58,6 @@ class ClientChat extends Component {
     onData = (data) => {
         Janus.log(":: We got message from Data Channel: ",data);
         var json = JSON.parse(data);
-        // var transaction = json["transaction"];
-        // if (transactions[transaction]) {
-        //     // Someone was waiting for this
-        //     transactions[transaction](json);
-        //     delete transactions[transaction];
-        //     return;
-        // }
         var what = json["textroom"];
         if (what === "message") {
             // Incoming message: public or private?
@@ -122,20 +115,6 @@ class ClientChat extends Component {
         }
     };
 
-    showSupportMessage = (message) => {
-        let {support_msgs} = this.state;
-        message.time = getDateString();
-        support_msgs.push(message);
-        this.setState({support_msgs, from: "Admin"});
-        if(this.props.visible) {
-            this.scrollToBottom();
-        } else {
-            notifyMe("Shidur",message.text,true);
-            this.setState({room_chat: false});
-            this.props.onNewMsg(true);
-        }
-    };
-
     sendChatMessage = () => {
         let {input_value, user, from, room_chat, support_msgs} = this.state;
         let msg = {user, text: input_value};
@@ -147,11 +126,6 @@ class ClientChat extends Component {
             ...pvt,
             text: JSON.stringify(msg),
         };
-        // Note: messages are always acknowledged by default. This means that you'll
-        // always receive a confirmation back that the message has been received by the
-        // server and forwarded to the recipients. If you do not want this to happen,
-        // just add an ack:false property to the message above, and server won't send
-        // you a response (meaning you just have to hope it succeeded).
         this.state.chatroom.data({
             text: JSON.stringify(message),
             error: (reason) => { alert(reason); },
@@ -168,10 +142,6 @@ class ClientChat extends Component {
 
     scrollToBottom = () => {
         this.refs.end.scrollIntoView({ behavior: 'smooth' })
-    };
-
-    tooggleChat = (room_chat) => {
-        this.setState({room_chat});
     };
 
     render() {
@@ -200,11 +170,6 @@ class ClientChat extends Component {
 
         return (
             <div className="chat-panel" >
-                {/* <div className="chat" > */}
-                <Button.Group attached='top'>
-                    <Button disabled={room_chat} color='blue' onClick={() => this.tooggleChat(true)}>Room chat</Button>
-                    <Button disabled={!room_chat} color='blue' onClick={() => this.tooggleChat(false)}>Support chat</Button>
-                </Button.Group>
                 <Message attached className='messages_list'>
                     <div className="messages-wrapper">
                         {room_chat ? room_msgs : admin_msgs}
@@ -218,7 +183,6 @@ class ClientChat extends Component {
                     <input />
                     <Button size='mini' positive onClick={this.sendChatMessage}>Send</Button>
                 </Input>
-                {/* </div> */}
             </div>
         );
 

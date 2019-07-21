@@ -7,7 +7,7 @@ import {geoInfo, initJanus, getDevicesStream, micLevel, checkNotification,testDe
 import './VirtualClient.scss'
 import './VideoConteiner.scss'
 import 'eqcss'
-import VirtualChat from "./ClientChat";
+import ClientChat from "./ClientChat";
 
 class ClientConf extends Component {
 
@@ -23,9 +23,9 @@ class ClientConf extends Component {
         janus: null,
         feeds: [],
         feedStreams: {},
-        rooms: [],
-        room: "",
-        selected_room: "",
+        rooms: [{description: "Conference",room: 1234,num_participants:0}],
+        room: 1234,
+        selected_room: 1234,
         videoroom: null,
         remoteFeed: null,
         myid: null,
@@ -659,29 +659,6 @@ class ClientConf extends Component {
         }
     };
 
-    onProtocolData = (data) => {
-        //TODO: Need to add transaction handle (filter and acknowledge)
-        let {room,feeds,users,user} = this.state;
-        if (data.type === "question" && data.room === room && user.id !== data.user.id) {
-            let rfid = users[data.user.id].rfid;
-            for (let i = 0; i < feeds.length; i++) {
-                if (feeds[i] && feeds[i].id === rfid) {
-                    feeds[i].question = data.status;
-                    break
-                }
-            }
-            this.setState({feeds});
-        }
-    };
-
-    sendDataMessage = (key,value) => {
-        let {videoroom,user} = this.state;
-        user[key] = value;
-        var message = JSON.stringify(user);
-        Janus.log(":: Sending message: ",message);
-        videoroom.data({ text: message })
-    };
-
     joinRoom = (reconnect) => {
         this.setState({delay: true});
         setTimeout(() => {
@@ -701,7 +678,7 @@ class ClientConf extends Component {
     };
 
     exitRoom = (reconnect) => {
-        let {videoroom, remoteFeed, protocol, room} = this.state;
+        let {videoroom, remoteFeed, room} = this.state;
         let leave = {request : "leave"};
         if(remoteFeed)
             remoteFeed.send({"message": leave});
@@ -723,7 +700,6 @@ class ClientConf extends Component {
 
     micMute = () => {
         let {videoroom, muted} = this.state;
-        //mystream.getAudioTracks()[0].enabled = !muted;
         muted ? videoroom.unmuteAudio() : videoroom.muteAudio();
         this.setState({muted: !muted});
     };
@@ -816,15 +792,14 @@ class ClientConf extends Component {
                     action>
                     <input iconPosition='left' disabled={mystream}/>
                     <Icon name='user circle'/>
-                    <Select
-                        disabled={mystream}
-                        error={!selected_room}
-
-                        placeholder="Select Room:"
-                        value={i}
-                        options={rooms_list}
-                        onClick={this.getRoomList}
-                        onChange={(e, {value}) => this.selectRoom(value)}/>
+                    {/*<Select*/}
+                    {/*    disabled*/}
+                    {/*    error={!selected_room}*/}
+                    {/*    placeholder="Conference"*/}
+                    {/*    value={i}*/}
+                    {/*    options={rooms_list}*/}
+                    {/*    onClick={this.getRoomList}*/}
+                    {/*    onChange={(e, {value}) => this.selectRoom(value)}/>*/}
                     {mystream ? <Button negative icon='sign-out' onClick={() => this.exitRoom(false)}/> : ""}
                     {!mystream ? <Button primary icon='sign-in' disabled={delay || !selected_room || !audio_device}
                                          onClick={this.joinRoom}/> : ""}
@@ -836,38 +811,18 @@ class ClientConf extends Component {
                         {this.state.visible ? "Close" : "Open"} Chat
                         {count > 0 ? l : ""}
                     </Menu.Item>
-                    <Menu.Item disabled={!mystream} onClick={this.handleQuestion}>
-                        <Icon color={question ? 'green' : ''} name='question'/>
-                        Ask a Question
-                    </Menu.Item>
-                    <Menu.Item disabled={this.state.shidur} onClick={this.showShidur}>
-                        <Icon name="tv"/>
-                        Open Broadcast
-                        {/*{this.state.shidur ?*/}
-                        {/*    <NewWindow*/}
-                        {/*        url='https://galaxy.kli.one/gxystr'*/}
-                        {/*        features={{width: "725", height: "635", left: "200", top: "200", location: "no"}}*/}
-                        {/*        title='V4G' onUnload={this.onUnload} onBlock={this.onBlock}>*/}
-                        {/*    </NewWindow> :*/}
-                        {/*    null*/}
-                        {/*}*/}
-                    </Menu.Item>
                 </Menu>
                 <Menu icon='labeled' secondary size="mini">
-                    <Menu.Item position='right' disabled={selftest !== "Self Audio Test" || mystream}
-                               onClick={this.selfTest}>
-                        <Icon color={tested ? 'green' : 'red'} name="sound"/>
-                        {selftest}
-                    </Menu.Item>
+                    {/*<Menu.Item position='right' disabled={selftest !== "Self Audio Test" || mystream}*/}
+                    {/*           onClick={this.selfTest}>*/}
+                    {/*    <Icon color={tested ? 'green' : 'red'} name="sound"/>*/}
+                    {/*    {selftest}*/}
+                    {/*</Menu.Item>*/}
                     <Menu.Item disabled={women || !mystream} onClick={this.micMute} className="mute-button">
                         <canvas className={muted ? 'hidden' : 'vumeter'} ref="canvas1" id="canvas1" width="15"
                                 height="35"/>
                         <Icon color={muted ? "red" : ""} name={!muted ? "microphone" : "microphone slash"}/>
                         {!muted ? "Mute" : "Unmute"}
-                    </Menu.Item>
-                    <Menu.Item disabled={!mystream || delay} onClick={this.camMute}>
-                        <Icon color={cammuted ? "red" : ""} name={!cammuted ? "eye" : "eye slash"}/>
-                        {!cammuted ? "Stop Video" : "Start Video"}
                     </Menu.Item>
                     <Popup
                         trigger={<Menu.Item icon="setting" name="Settings"/>}
@@ -900,27 +855,11 @@ class ClientConf extends Component {
                             <div className="videos__wrapper">
                                 <div className="video">
                                     <div className={classNames('video__overlay')}>
-                                        {question ?
-                                            <div className="question">
-                                                <svg viewBox="0 0 50 50">
-                                                    <text x="25" y="25" textAnchor="middle"
-                                                          alignmentBaseline="central"
-                                                          dominantBaseline="central">&#xF128;</text>
-                                                </svg>
-                                            </div>
-                                            :
-                                            ''
-                                        }
                                         <div className="video__title">
                                             {muted ? <Icon name="microphone slash" size="small"
                                                            color="red"/> : ''}{this.state.username_value || this.state.user.name}
                                         </div>
                                     </div>
-                                    <svg className={classNames('nowebcam', {'hidden': !cammuted})} viewBox="0 0 32 18"
-                                         preserveAspectRatio="xMidYMid meet">
-                                        <text x="16" y="9" textAnchor="middle" alignmentBaseline="central"
-                                              dominantBaseline="central">&#xf2bd;</text>
-                                    </svg>
                                     <video
                                         className={classNames('mirror', {'hidden': cammuted})}
                                         ref="localVideo"
@@ -937,7 +876,7 @@ class ClientConf extends Component {
                             </div>
                         </div>
                     </div>
-                    <VirtualChat
+                    <ClientChat
                         ref={chat => {this.chat = chat;}}
                         visible={this.state.visible}
                         janus={this.state.janus}
