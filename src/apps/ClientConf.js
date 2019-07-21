@@ -55,12 +55,13 @@ class ClientConf extends Component {
     };
 
     componentDidMount() {
-        if (isMobile) {
-            window.location = "/userm";
-        } else {
-            let {user} = this.state;
-            this.initClient(user);
-        }
+        // if (isMobile) {
+        //     window.location = "/userm";
+        // } else {
+        //     let {user} = this.state;
+        //     this.initClient(user);
+        // }
+        this.initClient(this.state.user);
     };
 
     componentWillUnmount() {
@@ -693,46 +694,10 @@ class ClientConf extends Component {
         user.self_test = tested;
         user.sound_test = reconnect ? JSON.parse(localStorage.getItem("sound_test")) : false;
         localStorage.setItem("username", user.display);
-        initGxyProtocol(janus, user, protocol => {
-            this.setState({protocol});
-            // Send question event if before join it was true
-            if(reconnect && JSON.parse(localStorage.getItem("question"))) {
-                let msg = { type: "question", status: true, room: selected_room, user};
-                setTimeout(() => {
-                    sendProtocolMessage(protocol, user, msg );
-                }, 5000);
-            }
-        }, ondata => {
-            Janus.log("-- :: It's protocol public message: ", ondata);
-            const {type,error_code,id,room} = ondata;
-            if(type === "error" && error_code === 420) {
-                alert(ondata.error);
-                this.state.protocol.hangup();
-            } else if(type === "joined") {
-                let register = { "request": "join", "room": selected_room, "ptype": "publisher", "display": JSON.stringify(user) };
-                videoroom.send({"message": register});
-                this.setState({user, muted: !women, room: selected_room});
-                this.chat.initChatRoom(user,selected_room);
-            } else if(type === "chat-broadcast" && room === selected_room) {
-                this.chat.showSupportMessage(ondata);
-            } else if(type === "client-reconnect" && user.id === id) {
-                this.exitRoom(true);
-            } else if(type === "client-reload" && user.id === id) {
-                window.location.reload();
-            } else if(type === "client-disconnect" && user.id === id) {
-                this.exitRoom();
-            } else if(type === "client-question" && user.id === id) {
-                this.handleQuestion();
-            } else if(type === "client-mute" && user.id === id) {
-                this.micMute();
-            } else if(type === "sound-test" && user.id === id) {
-                let {user} = this.state;
-                user.sound_test = true;
-                localStorage.setItem("sound_test", true);
-                this.setState({user});
-            }
-            this.onProtocolData(ondata);
-        });
+        let register = { "request": "join", "room": selected_room, "ptype": "publisher", "display": JSON.stringify(user) };
+        videoroom.send({"message": register});
+        this.setState({user, muted: !women, room: selected_room});
+        this.chat.initChatRoom(user,selected_room);
     };
 
     exitRoom = (reconnect) => {
@@ -745,7 +710,6 @@ class ClientConf extends Component {
         localStorage.setItem("question", false);
         this.setState({muted: false, cammuted: false, mystream: null, room: "", selected_room: (reconnect ? room : ""), i: "", feeds: [], mids: [], remoteFeed: null, question: false});
         this.initVideoRoom(reconnect);
-        protocol.detach();
     };
 
     selectRoom = (i) => {
@@ -757,45 +721,11 @@ class ClientConf extends Component {
         this.setState({selected_room,name,i});
     };
 
-    handleQuestion = () => {
-        //TODO: only when shidur user is online will be avelable send question event, so we need to add check
-        const { protocol, user, room, question} = this.state;
-        localStorage.setItem("question", !question);
-        let msg = { type: "question", status: !question, room, user};
-        sendProtocolMessage(protocol, user, msg );
-        this.setState({question: !question});
-    };
-
-    camMute = () => {
-        let {videoroom,cammuted,protocol,user,room} = this.state;
-        cammuted ? videoroom.unmuteVideo() : videoroom.muteVideo();
-        this.setState({cammuted: !cammuted, delay: true});
-        setTimeout(() => {
-            this.setState({delay: false});
-        }, 3000);
-        this.sendDataMessage("camera", this.state.cammuted);
-        // Send to protocol camera status event
-        let msg = { type: "camera", status: cammuted, room, user};
-        sendProtocolMessage(protocol, user, msg );
-    };
-
     micMute = () => {
         let {videoroom, muted} = this.state;
         //mystream.getAudioTracks()[0].enabled = !muted;
         muted ? videoroom.unmuteAudio() : videoroom.muteAudio();
         this.setState({muted: !muted});
-    };
-
-    showShidur = () => {
-        this.setState({shidur: !this.state.shidur})
-    };
-
-    onUnload = () => {
-        this.setState({shidur: false})
-    };
-
-    onBlock = () => {
-        alert("You browser is block our popup! You need allow it")
     };
 
     onNewMsg = (private_message) => {
@@ -913,14 +843,14 @@ class ClientConf extends Component {
                     <Menu.Item disabled={this.state.shidur} onClick={this.showShidur}>
                         <Icon name="tv"/>
                         Open Broadcast
-                        {this.state.shidur ?
-                            <NewWindow
-                                url='https://galaxy.kli.one/gxystr'
-                                features={{width: "725", height: "635", left: "200", top: "200", location: "no"}}
-                                title='V4G' onUnload={this.onUnload} onBlock={this.onBlock}>
-                            </NewWindow> :
-                            null
-                        }
+                        {/*{this.state.shidur ?*/}
+                        {/*    <NewWindow*/}
+                        {/*        url='https://galaxy.kli.one/gxystr'*/}
+                        {/*        features={{width: "725", height: "635", left: "200", top: "200", location: "no"}}*/}
+                        {/*        title='V4G' onUnload={this.onUnload} onBlock={this.onBlock}>*/}
+                        {/*    </NewWindow> :*/}
+                        {/*    null*/}
+                        {/*}*/}
                     </Menu.Item>
                 </Menu>
                 <Menu icon='labeled' secondary size="mini">
