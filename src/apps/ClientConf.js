@@ -8,6 +8,7 @@ import './VirtualClient.scss'
 import './VideoConteiner.scss'
 import 'eqcss'
 import ClientChat from "./ClientChat";
+import {ROOM_SECRET} from "../shared/consts";
 
 class ClientConf extends Component {
 
@@ -689,6 +690,12 @@ class ClientConf extends Component {
         this.initVideoRoom(reconnect);
     };
 
+    editRoom = () => {
+        let {videoroom, room} = this.state;
+        let request = {request:"edit", room:room, secret:ROOM_SECRET, new_bitrate:2000000};
+        videoroom.send({"message": request});
+    };
+
     selectRoom = (i) => {
         const {rooms} = this.state;
         let selected_room = rooms[i].room;
@@ -844,6 +851,7 @@ class ClientConf extends Component {
                                     value={video_device}
                                     options={vdevices_list}
                                     onChange={(e, {value}) => this.setDevice(value, audio_device)}/>
+                            <Button onClick={this.editRoom}>Bitrate</Button>
                         </Popup.Content>
                     </Popup>
                 </Menu>
