@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Janus } from "../lib/janus";
 import classNames from 'classnames';
-//import {isMobile} from "react-device-detect";
+import {isMobile} from "react-device-detect";
 import {Menu, Select, Button,Input,Label,Icon,Popup} from "semantic-ui-react";
 import {geoInfo, initJanus, getDevicesStream, micLevel, checkNotification,testDevices,testMic} from "../shared/tools";
 import './VirtualClient.scss'
@@ -81,7 +81,7 @@ class ClientConf extends Component {
         initJanus(janus => {
             user.session = janus.getSessionId();
             this.setState({janus, user});
-            this.chat.initChat(janus);
+            if(!isMobile) this.chat.initChat(janus);
             this.initVideoRoom(error);
         }, er => {
             setTimeout(() => {
@@ -676,7 +676,8 @@ class ClientConf extends Component {
         let register = { "request": "join", "room": selected_room, "ptype": "publisher", "display": JSON.stringify(user) };
         videoroom.send({"message": register});
         this.setState({user, muted: !women, room: selected_room});
-        this.chat.initChatRoom(user,selected_room);
+        if(!isMobile)
+            this.chat.initChatRoom(user,selected_room);
     };
 
     exitRoom = (reconnect) => {
@@ -685,7 +686,8 @@ class ClientConf extends Component {
         if(remoteFeed)
             remoteFeed.send({"message": leave});
         videoroom.send({"message": leave});
-        this.chat.exitChatRoom(room);
+        if(!isMobile)
+            this.chat.exitChatRoom(room);
         localStorage.setItem("question", false);
         this.setState({muted: false, cammuted: false, mystream: null, i: "", feeds: [], mids: [], remoteFeed: null, question: false});
         this.initVideoRoom(reconnect);
@@ -827,12 +829,13 @@ class ClientConf extends Component {
                                          onClick={this.joinRoom}/> : ""}
                 </Input>
                 <Menu icon='labeled' secondary size="mini">
+                    {isMobile ? "" :
                     <Menu.Item disabled={!mystream}
                                onClick={() => this.setState({visible: !this.state.visible, count: 0})}>
                         <Icon name="comments"/>
                         {this.state.visible ? "Close" : "Open"} Chat
                         {count > 0 ? l : ""}
-                    </Menu.Item>
+                    </Menu.Item>}
                 </Menu>
                 <Menu icon='labeled' secondary size="mini">
                     {/*<Menu.Item position='right' disabled={selftest !== "Self Audio Test" || mystream}*/}
@@ -906,13 +909,14 @@ class ClientConf extends Component {
                             </div>
                         </div>
                     </div>
+                    {isMobile ? "" :
                     <ClientChat
                         ref={chat => {this.chat = chat;}}
                         visible={this.state.visible}
                         janus={this.state.janus}
                         room={room}
                         user={this.state.user}
-                        onNewMsg={this.onNewMsg}/>
+                        onNewMsg={this.onNewMsg}/>}
                 </div>
             </div>
         </div>);
