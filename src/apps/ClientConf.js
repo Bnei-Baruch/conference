@@ -696,6 +696,10 @@ class ClientConf extends Component {
         videoroom.send({"message": request});
     };
 
+    editPublisher = (bitrate) => {
+        this.state.videoroom.send({"message": { "request": "configure", "bitrate": bitrate }});
+    };
+
     selectRoom = (i) => {
         const {rooms} = this.state;
         let selected_room = rooms[i].room;
