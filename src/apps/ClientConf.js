@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Janus } from "../lib/janus";
 import classNames from 'classnames';
-import {isMobile} from "react-device-detect";
+//import {isMobile} from "react-device-detect";
 import {Menu, Select, Button,Input,Label,Icon,Popup} from "semantic-ui-react";
 import {geoInfo, initJanus, getDevicesStream, micLevel, checkNotification,testDevices,testMic} from "../shared/tools";
 import './VirtualClient.scss'
@@ -685,7 +685,7 @@ class ClientConf extends Component {
         videoroom.send({"message": leave});
         this.chat.exitChatRoom(room);
         localStorage.setItem("question", false);
-        this.setState({muted: false, cammuted: false, mystream: null, room: "", selected_room: (reconnect ? room : ""), i: "", feeds: [], mids: [], remoteFeed: null, question: false});
+        this.setState({muted: false, cammuted: false, mystream: null, i: "", feeds: [], mids: [], remoteFeed: null, question: false});
         this.initVideoRoom(reconnect);
     };
 
@@ -747,17 +747,17 @@ class ClientConf extends Component {
                              key={"v" + id}
                              ref={"video" + id}
                              id={"video" + id}>
-                    <div className={classNames('video__overlay', {'talk' : talk})}>
-                        {question ? <div className="question">
-                            <svg viewBox="0 0 50 50">
-                                <text x="25" y="25" textAnchor="middle" alignmentBaseline="central" dominantBaseline="central">&#xF128;</text>
-                            </svg>
-                        </div>:''}
-                        <div className="video__title">{!talk ? <Icon name="microphone slash" size="small" color="red"/> : ''}{display_name}</div>
-                    </div>
-                    <svg className={classNames('nowebcam',{'hidden':!cammute})} viewBox="0 0 32 18" preserveAspectRatio="xMidYMid meet" >
-                        <text x="16" y="9" textAnchor="middle" alignmentBaseline="central" dominantBaseline="central">&#xf2bd;</text>
-                    </svg>
+                    {/*<div className={classNames('video__overlay', {'talk' : talk})}>*/}
+                    {/*    {question ? <div className="question">*/}
+                    {/*        <svg viewBox="0 0 50 50">*/}
+                    {/*            <text x="25" y="25" textAnchor="middle" alignmentBaseline="central" dominantBaseline="central">&#xF128;</text>*/}
+                    {/*        </svg>*/}
+                    {/*    </div>:''}*/}
+                    {/*    <div className="video__title">{!talk ? <Icon name="microphone slash" size="small" color="red"/> : ''}{display_name}</div>*/}
+                    {/*</div>*/}
+                    {/*<svg className={classNames('nowebcam',{'hidden':!cammute})} viewBox="0 0 32 18" preserveAspectRatio="xMidYMid meet" >*/}
+                    {/*    <text x="16" y="9" textAnchor="middle" alignmentBaseline="central" dominantBaseline="central">&#xf2bd;</text>*/}
+                    {/*</svg>*/}
                     <video
                         key={"v"+id}
                         ref={"remoteVideo" + id}
@@ -853,6 +853,7 @@ class ClientConf extends Component {
                     <div className="videos-panel">
                         <div className="videos">
                             <div className="videos__wrapper">
+                                { this.state.feeds.length === 0 ?
                                 <div className="video">
                                     <div className={classNames('video__overlay')}>
                                         <div className="video__title">
@@ -871,7 +872,7 @@ class ClientConf extends Component {
                                         muted={true}
                                         playsinline={true}/>
 
-                                </div>
+                                </div> : ""}
                                 {videos}
                             </div>
                         </div>
@@ -889,7 +890,8 @@ class ClientConf extends Component {
 
         return (
             <div>
-                {isMobile ? <div> This content is unavailable on mobile </div> : content}
+                {/*{isMobile ? <div> This content is unavailable on mobile </div> : content}*/}
+                {content}
             </div>
         );
     }
