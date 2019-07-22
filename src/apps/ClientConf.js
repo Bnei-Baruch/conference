@@ -13,6 +13,7 @@ import {ROOM_SECRET} from "../shared/consts";
 class ClientConf extends Component {
 
     state = {
+        bitrate: 600000,
         count: 0,
         creatingFeed: false,
         delay: false,
@@ -692,11 +693,12 @@ class ClientConf extends Component {
 
     editRoom = () => {
         let {videoroom, room} = this.state;
-        let request = {request:"edit", room:room, secret:ROOM_SECRET, new_bitrate:2000000};
+        let request = {request:"edit", room:room, secret:ROOM_SECRET, new_bitrate:600000};
         videoroom.send({"message": request});
     };
 
-    editPublisher = (bitrate) => {
+    setBitrate = (bitrate) => {
+        this.setState({bitrate});
         this.state.videoroom.send({"message": { "request": "configure", "bitrate": bitrate }});
     };
 
@@ -722,7 +724,7 @@ class ClientConf extends Component {
 
     render() {
 
-        const { rooms,room,audio_devices,video_devices,video_device,audio_device,i,muted,cammuted,delay,mystream,selected_room,count,question,selftest,tested,women} = this.state;
+        const { rooms,room,audio_devices,video_devices,video_device,audio_device,i,muted,cammuted,delay,mystream,selected_room,count,bitrate,selftest,tested,women} = this.state;
         const width = "134";
         const height = "100";
         const autoPlay = true;
@@ -745,6 +747,15 @@ class ClientConf extends Component {
             const {label, deviceId} = device;
             return ({ key: i, text: label, value: deviceId})
         });
+
+        let bitrate_list = [
+            { key: 1, text: "100 Kbit/s", value: 100000},
+            { key: 2, text: "200 Kbit/s", value: 200000},
+            { key: 3, text: "300 Kbit/s", value: 300000},
+            { key: 4, text: "600 Kbit/s", value: 600000},
+            { key: 5, text: "1200 Kbit/s", value: 1200000},
+            { key: 6, text: "2400 Kbit/s", value: 2400000},
+        ];
 
         let videos = this.state.feeds.map((feed) => {
             if(feed) {
@@ -855,7 +866,13 @@ class ClientConf extends Component {
                                     value={video_device}
                                     options={vdevices_list}
                                     onChange={(e, {value}) => this.setDevice(value, audio_device)}/>
-                            <Button onClick={this.editRoom}>Bitrate</Button>
+                            <Select className='select_device'
+                                    disabled={!mystream}
+                                    placeholder="Select Bitrate:"
+                                    value={bitrate}
+                                    options={bitrate_list}
+                                    onChange={(e, {value}) => this.setBitrate(value)}/>
+                            {/*<Button onClick={this.editRoom}>Bitrate</Button>*/}
                         </Popup.Content>
                     </Popup>
                 </Menu>
