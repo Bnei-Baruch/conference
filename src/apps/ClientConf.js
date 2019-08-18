@@ -885,7 +885,6 @@ class ClientConf extends Component {
                     <div className="videos-panel">
                         <div className="videos">
                             <div className="videos__wrapper">
-                                { this.state.feeds.length === 0 ?
                                 <div className="video">
                                     <div className={classNames('video__overlay')}>
                                         <div className="video__title">
@@ -904,7 +903,7 @@ class ClientConf extends Component {
                                         muted={true}
                                         playsinline={true}/>
 
-                                </div> : ""}
+                                </div>
                                 {videos}
                             </div>
                         </div>
