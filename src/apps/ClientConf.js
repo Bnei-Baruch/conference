@@ -295,10 +295,10 @@ class ClientConf extends Component {
                 // Add data:true here if you want to publish datachannels as well
                 media: {
                     audioRecv: false, videoRecv: false, audioSend: true, videoSend: useVideo, audio: {
-                        autoGainControl: false,
-                        echoCancellation: false,
-                        highpassFilter: false,
-                        noiseSuppression: false,
+                        autoGainControl: true,
+                        echoCancellation: true,
+                        highpassFilter: true,
+                        noiseSuppression: true,
                         deviceId: {
                             exact: audio_device
                         }
@@ -542,6 +542,7 @@ class ClientConf extends Component {
                                 // Add data:true here if you want to subscribe to datachannels as well
                                 // (obviously only works if the publisher offered them in the first place)
                                 media: { audioSend: false, videoSend: false, data:true },	// We want recvonly audio/video
+
                                 success: (jsep) => {
                                     Janus.debug("Got SDP!");
                                     Janus.debug(jsep);
