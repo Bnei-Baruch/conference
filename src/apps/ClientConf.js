@@ -8,7 +8,7 @@ import './VirtualClient.scss'
 import './VideoConteiner.scss'
 import 'eqcss'
 import ClientChat from "./ClientChat";
-import {ROOM_SECRET} from "../shared/consts";
+import {GEO_IP_INFO,ROOM_SECRET} from "../shared/consts";
 
 class ClientConf extends Component {
 
@@ -74,9 +74,9 @@ class ClientConf extends Component {
         localStorage.setItem("question", false);
         localStorage.setItem("sound_test", false);
         checkNotification();
-        geoInfo('https://v4g.kbb1.com/geo.php?action=get', data => {
+        geoInfo(`${GEO_IP_INFO}`, data => {
             Janus.log(data);
-            user.ip = data.external_ip;
+            user.ip = data.ip;
         });
         initJanus(janus => {
             user.session = janus.getSessionId();
