@@ -8,7 +8,7 @@ import './VirtualClient.scss'
 import './VideoConteiner.scss'
 import 'eqcss'
 import ClientChat from "./ClientChat";
-import {GEO_IP_INFO,ROOM_SECRET} from "../shared/consts";
+import {GEO_IP_INFO,ROOM_SECRET,GXY_ROOM} from "../shared/consts";
 
 class ClientConf extends Component {
 
@@ -25,9 +25,9 @@ class ClientConf extends Component {
         janus: null,
         feeds: [],
         feedStreams: {},
-        rooms: [{description: "Conference",room: 1234,num_participants:0}],
-        room: 1234,
-        selected_room: 1234,
+        rooms: [{description: "Conference",room: GXY_ROOM,num_participants:0}],
+        room: GXY_ROOM,
+        selected_room: GXY_ROOM,
         videoroom: null,
         remoteFeed: null,
         myid: null,

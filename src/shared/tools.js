@@ -3,7 +3,7 @@ import {JANUS_SRV_GXY, STUN_SRV_GXY, JANUS_ADMIN_GXY, ADMIN_SECRET} from "./cons
 
 export const initJanus = (cb) => {
     Janus.init({
-        debug: ["log","error"],
+        debug: process.env.NODE_ENV !== 'production' ? ["log", "error"] : ["error"],
         callback: () => {
             let janus = new Janus({
                 server: JANUS_SRV_GXY,
