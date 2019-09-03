@@ -895,7 +895,7 @@ class ClientConf extends Component {
                                         autoPlay={autoPlay}
                                         controls={controls}
                                         muted={true}
-                                        playsinline={true}/>
+                                        playsInline={true}/>
 
                                 </div>
                                 {videos}
