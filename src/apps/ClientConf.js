@@ -8,7 +8,7 @@ import './VirtualClient.scss'
 import './VideoConteiner.scss'
 import 'eqcss'
 import ClientChat from "./ClientChat";
-import {GEO_IP_INFO,ROOM_SECRET,GXY_ROOM} from "../shared/consts";
+import {GEO_IP_INFO,ROOM_SECRET,GXY_ROOM,SECRET,HOST_IP,VIDEO_PORT,AUDIO_PORT,VIDEO_RTCP_PORT} from "../shared/consts";
 
 class ClientConf extends Component {
 
@@ -207,6 +207,57 @@ class ClientConf extends Component {
         })
     };
 
+    startForward = () => {
+        let {room,myid} = this.state;
+        const {videoroom} = this.state;
+        Janus.log(" :: Start forward from room: ", room);
+        let forward = {
+            request: "rtp_forward",
+            publisher_id:myid,
+            room:room,
+            secret:`${SECRET}`,
+            host:`${HOST_IP}`,
+            video_port: VIDEO_PORT,
+            video_rtcp_port: VIDEO_RTCP_PORT,
+            audio_port: AUDIO_PORT,
+            video_pt: 96,
+            audio_pt: 111
+        };
+        videoroom.send({"message": forward,
+            success: (data) => {
+                Janus.log(":: Forward callback: ", data);
+                let video_id = data["rtp_stream"]["video_stream_id"];
+                let audio_id = data["rtp_stream"]["audio_stream_id"];
+                this.setState({video_id,audio_id});
+            },
+        });
+    };
+
+    stopForward = (room) => {
+        const {video_id,audio_id,myid} = this.state;
+        const {videoroom} = this.state;
+        if(video_id) {
+            Janus.log(" :: Stop video forward from room: ", room);
+            let stopfw = { request:"stop_rtp_forward", stream_id:video_id, publisher_id:myid, room:room, secret:`${SECRET}` };
+            videoroom.send({"message": stopfw,
+                success: (data) => {
+                    Janus.log(":: Video Forward callback: ", data);
+                    this.setState({video_id: null});
+                },
+            });
+        }
+        if(audio_id) {
+            Janus.log(" :: Stop audio forward from room: ", room);
+            let stopfw = { request:"stop_rtp_forward", stream_id:audio_id, publisher_id:myid, room:room, secret:`${SECRET}` };
+            videoroom.send({"message": stopfw,
+                success: (data) => {
+                    Janus.log(":: Forward callback: ", data);
+                    this.setState({audio_id: null});
+                },
+            });
+        }
+    };
+
     initVideoRoom = (reconnect) => {
         if(this.state.videoroom)
             this.state.videoroom.detach();
@@ -240,6 +291,9 @@ class ClientConf extends Component {
             },
             mediaState: (medium, on) => {
                 Janus.log("Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
+                // setTimeout(() => {
+                //     this.startForward()
+                // }, 3000);
             },
             webrtcState: (on) => {
                 Janus.log("Janus says our WebRTC PeerConnection is " + (on ? "up" : "down") + " now");
@@ -676,6 +730,7 @@ class ClientConf extends Component {
 
     exitRoom = (reconnect) => {
         let {videoroom, remoteFeed, room} = this.state;
+        this.stopForward(room);
         let leave = {request : "leave"};
         if(remoteFeed)
             remoteFeed.send({"message": leave});
