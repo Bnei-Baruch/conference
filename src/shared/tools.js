@@ -209,7 +209,7 @@ export const checkNotification = () => {
 
 export const getDevicesStream = (audioid,videoid,cb) => {
     //FIXME: Safari does not agree to give nHD resolution
-    let height = (Janus.webRTCAdapter.browserDetails.browser === "safari") ? 480 : 360;
+    let height = (Janus.webRTCAdapter.default.browserDetails.browser === "safari") ? 480 : 360;
     let video = videoid ? { height:height,width:640,deviceId: {exact: videoid}} : "";
     let audio = audioid ? { deviceId: {exact: audioid}} : "";
     navigator.mediaDevices

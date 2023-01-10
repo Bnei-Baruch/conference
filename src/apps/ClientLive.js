@@ -10,7 +10,7 @@ import 'eqcss'
 import ClientChat from "./ClientChat";
 import {GEO_IP_INFO,ROOM_SECRET,GXY_ROOM,SECRET,HOST_IP,VIDEO_PORT,AUDIO_PORT,VIDEO_RTCP_PORT} from "../shared/consts";
 
-class ClientConf extends Component {
+class ClientLive extends Component {
 
     state = {
         bitrate: 600000,
@@ -79,7 +79,7 @@ class ClientConf extends Component {
             user.ip = data.ip;
         });
         initJanus(janus => {
-            this.initDevices(true);
+            //this.initDevices(true);
             user.session = janus.getSessionId();
             this.setState({janus, user});
             if(!isMobile) this.chat.initChat(janus);
@@ -395,11 +395,11 @@ class ClientConf extends Component {
                 let mypvtid = msg["private_id"];
                 this.setState({myid ,mypvtid});
                 Janus.log("Successfully joined room " + msg["room"] + " with ID " + myid);
-                this.publishOwnFeed(true);
+                //this.publishOwnFeed(true);
                 // Any new feed to attach to?
                 if(msg["publishers"] !== undefined && msg["publishers"] !== null) {
-                    let list = msg["publishers"];
-                    let feeds = list.filter(feeder => JSON.parse(feeder.display).role === "user");
+                    let feeds = msg["publishers"];
+                    //let feeds = list.filter(feeder => JSON.parse(feeder.display).role === "user");
                     let {feedStreams,users} = this.state;
                     Janus.log(":: Got Pulbishers list: ", feeds);
                     if(feeds.length > 15) {
@@ -422,8 +422,8 @@ class ClientConf extends Component {
                             stream["display"] = display;
                         }
                         feedStreams[id] = {id, display, streams};
-                        users[display.id] = display;
-                        users[display.id].rfid = id;
+                        //users[display.id] = display;
+                        //users[display.id].rfid = id;
                         subscription.push({
                             feed: id,	// This is mandatory
                             //mid: stream.mid		// This is optional (all streams, if missing)
@@ -487,8 +487,8 @@ class ClientConf extends Component {
                             stream["display"] = display;
                         }
                         feedStreams[id] = {id, display, streams};
-                        users[display.id] = display;
-                        users[display.id].rfid = id;
+                        //users[display.id] = display;
+                        //users[display.id].rfid = id;
                         subscription.push({
                             feed: id,	// This is mandatory
                             //mid: stream.mid		// This is optional (all streams, if missing)
@@ -722,7 +722,7 @@ class ClientConf extends Component {
         localStorage.setItem("username", user.display);
         let register = { "request": "join", "room": selected_room, "ptype": "publisher", "display": JSON.stringify(user) };
         videoroom.send({"message": register});
-        this.setState({user, muted: !women, room: selected_room});
+        this.setState({user, muted: !women, room: selected_room, mystream: "on"});
         if(!isMobile)
             this.chat.initChatRoom(user,selected_room);
     };
@@ -873,7 +873,7 @@ class ClientConf extends Component {
                     {/*    onClick={this.getRoomList}*/}
                     {/*    onChange={(e, {value}) => this.selectRoom(value)}/>*/}
                     {mystream ? <Button negative icon='sign-out' onClick={() => this.exitRoom(false)}/> : ""}
-                    {!mystream ? <Button primary icon='sign-in' disabled={delay || !selected_room || !audio_device}
+                    {!mystream ? <Button primary icon='sign-in' disabled={delay}
                                          onClick={this.joinRoom}/> : ""}
                 </Input>
                 <Menu icon='labeled' secondary size="mini">
@@ -933,25 +933,25 @@ class ClientConf extends Component {
                     <div className="videos-panel">
                         <div className="videos">
                             <div className="videos__wrapper">
-                                <div className="video">
-                                    <div className={classNames('video__overlay')}>
-                                        <div className="video__title">
-                                            {muted ? <Icon name="microphone slash" size="small"
-                                                           color="red"/> : ''}{this.state.username_value || this.state.user.name}
-                                        </div>
-                                    </div>
-                                    <video
-                                        className={classNames('mirror', {'hidden': cammuted})}
-                                        ref="localVideo"
-                                        id="localVideo"
-                                        width={width}
-                                        height={height}
-                                        autoPlay={autoPlay}
-                                        controls={controls}
-                                        muted={true}
-                                        playsInline={true}/>
+                                {/*<div className="video">*/}
+                                {/*    <div className={classNames('video__overlay')}>*/}
+                                {/*        <div className="video__title">*/}
+                                {/*            {muted ? <Icon name="microphone slash" size="small"*/}
+                                {/*                           color="red"/> : ''}{this.state.username_value || this.state.user.name}*/}
+                                {/*        </div>*/}
+                                {/*    </div>*/}
+                                {/*    <video*/}
+                                {/*        className={classNames('mirror', {'hidden': cammuted})}*/}
+                                {/*        ref="localVideo"*/}
+                                {/*        id="localVideo"*/}
+                                {/*        width={width}*/}
+                                {/*        height={height}*/}
+                                {/*        autoPlay={autoPlay}*/}
+                                {/*        controls={controls}*/}
+                                {/*        muted={true}*/}
+                                {/*        playsInline={true}/>*/}
 
-                                </div>
+                                {/*</div>*/}
                                 {videos}
                             </div>
                         </div>
@@ -977,4 +977,4 @@ class ClientConf extends Component {
     }
 }
 
-export default ClientConf;
+export default ClientLive;
